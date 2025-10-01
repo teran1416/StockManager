@@ -1,19 +1,16 @@
+// src/router/index.js
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../store/auth'
 
-// Vistas
-import Home from '../views/Home.vue'
+// Vistas (ajusta las rutas a tus archivos reales)
 import Login from '../views/Login.vue'
-import Register from '../views/Register.vue'
-import Products from '../views/Products.vue'
-import Reports from '../views/Reports.vue'
+const Home = () => import('../views/Home.vue')
+const NotFound = () => import('../views/NotFound.vue')
 
 const routes = [
   {
     path: '/',
-    name: 'Home',
-    component: Home,
-    meta: { requiresAuth: true }
+    redirect: { name: 'Login' } // evita el warning por "/"
   },
   {
     path: '/login',
@@ -22,50 +19,44 @@ const routes = [
     meta: { guest: true }
   },
   {
-    path: '/register',
-    name: 'Register',
-    component: Register,
-    meta: { guest: true }
-  },
-  {
-    path: '/products',
-    name: 'Products',
-    component: Products,
+    path: '/home',
+    name: 'Home',
+    component: Home,
     meta: { requiresAuth: true }
   },
   {
-    path: '/reports',
-    name: 'Reports',
-    component: Reports,
-    meta: { requiresAuth: true }
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: NotFound
   }
 ]
 
+const base =
+  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.BASE_URL) ||
+  (typeof process !== 'undefined' && process.env && process.env.BASE_URL) ||
+  '/'
+
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
+  history: createWebHistory(base),
   routes
 })
 
-// Navegación guard
+// Guard de navegación
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
-  const isAuthenticated = authStore.isAuthenticated
-  
-  if (to.matched.some(record => record.meta.requiresAuth)) {
-    if (!isAuthenticated) {
-      next({ name: 'Login' })
-    } else {
-      next()
-    }
-  } else if (to.matched.some(record => record.meta.guest)) {
-    if (isAuthenticated) {
-      next({ name: 'Home' })
-    } else {
-      next()
-    }
-  } else {
-    next()
+  const isAuthenticated = !!authStore.isAuthenticated // asegúrate que sea booleano
+
+  if (to.matched.some(r => r.meta.requiresAuth)) {
+    if (!isAuthenticated) return next({ name: 'Login' })
+    return next()
   }
+
+  if (to.matched.some(r => r.meta.guest)) {
+    if (isAuthenticated) return next({ name: 'Home' })
+    return next()
+  }
+
+  return next()
 })
 
 export default router
