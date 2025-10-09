@@ -1,31 +1,31 @@
+// Importaciones principales
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 
-// Load environment variables
+// Cargar variables de entorno desde .env
 dotenv.config();
 
-// Connect to MongoDB
+// Conectar a MongoDB
 connectDB();
 
-// Initialize Express
+// Inicializar Express
 const app = express();
 
-// Middleware
-app.use(cors());
-app.use(express.json());
+// Middlewares globales
+app.use(cors());              // Permite peticiones desde tu frontend
+app.use(express.json());      // Permite leer datos en formato JSON
 
-// Routes
-app.use('/api/users', require('./routes/userRoutes'));
-app.use('/api/products', require('./routes/productRoutes'));
+// Rutas del sistema
+app.use('/api/users', require('./routes/userRoutes')); // Solo usuarios (registro/login)
 
-// Basic route for testing
+// Ruta base para probar el servidor
 app.get('/', (req, res) => {
-  res.send('API is running...');
+  res.send('✅ API de StockManager funcionando correctamente');
 });
 
-// Error handling middleware
+// Middleware para manejo de errores genérico
 app.use((err, req, res, next) => {
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
   res.status(statusCode);
@@ -35,8 +35,8 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start server
+// Iniciar el servidor
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
 });

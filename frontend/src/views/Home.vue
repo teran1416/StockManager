@@ -1,6 +1,5 @@
 <template>
   <div>
-    <h1>Página de inicio</h1>
-    <p>Bienvenido a StockManager 🎉</p>
+    <h1>Error 404 La Vista apenas la vamos a hacer profe</h1>
   </div>
 </template>
