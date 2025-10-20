@@ -157,7 +157,3 @@ stockmanager/
 3. Haz commit de tus cambios (`git commit -m 'Añadir nueva característica'`)
 4. Haz push a la rama (`git push origin feature/nueva-caracteristica`)
 5. Abre un Pull Request
-
-## Licencia
-
-Este proyecto está licenciado bajo la Licencia MIT - ver el archivo LICENSE para más detalles.
