@@ -1,10 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { useAuthStore } from '@/store/auth'
+import { useAuthStore } from '../store/auth'
 
 // Vistas
 import Home from '../views/Home.vue'
 import Login from '../views/Login.vue'
-
+import Register from '../views/Register.vue'
 
 const routes = [
   {
@@ -19,8 +19,12 @@ const routes = [
     component: Login,
     meta: { guest: true }
   },
- { path: '/register', name: 'Register', component: () => import('@/views/Register.vue'), meta: { guest: true } }
-
+  {
+    path: '/register',
+    name: 'Register',
+    component: Register,
+    meta: { guest: true }
+  }
 ]
 
 const router = createRouter({
@@ -32,7 +36,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
   const isAuthenticated = authStore.isAuthenticated
-  
+
   if (to.matched.some(record => record.meta.requiresAuth)) {
     if (!isAuthenticated) {
       next({ name: 'Login' })
