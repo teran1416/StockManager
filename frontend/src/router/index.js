@@ -5,6 +5,7 @@ import { useAuthStore } from '../store/auth'
 import Home from '../views/Home.vue'
 import Login from '../views/Login.vue'
 import Register from '../views/Register.vue'
+import Products from '../views/Products.vue'
 
 const routes = [
   {
@@ -24,6 +25,12 @@ const routes = [
     name: 'Register',
     component: Register,
     meta: { guest: true }
+  },
+  {
+    path: '/products',
+    name: 'Products',
+    component: Products,
+    meta: { requiresAuth: true }
   }
 ]
 
@@ -36,7 +43,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
   const isAuthenticated = authStore.isAuthenticated
-
+  
   if (to.matched.some(record => record.meta.requiresAuth)) {
     if (!isAuthenticated) {
       next({ name: 'Login' })
