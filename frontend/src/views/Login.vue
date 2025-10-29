@@ -1,6 +1,6 @@
 <template>
-  <div class="login-container">
-    <h1>Iniciar Sesión</h1>
+  <div class="form-container">
+    <h1 class="form-title">Iniciar Sesión</h1>
     <form @submit.prevent="handleLogin" class="login-form">
       <div class="form-group">
         <label for="email">Correo Electrónico</label>
@@ -25,10 +25,12 @@
       </div>
       
       <div v-if="error" class="error-message">
-        {{ error }}
+        <i class="fas fa-exclamation-circle"></i> {{ error }}
       </div>
       
-      <button type="submit" :disabled="loading">
+      <button type="submit" :disabled="loading" class="btn btn-block">
+        <i class="fas fa-sign-in-alt" v-if="!loading"></i>
+        <i class="fas fa-spinner fa-spin" v-if="loading"></i>
         {{ loading ? 'Iniciando sesión...' : 'Iniciar Sesión' }}
       </button>
       

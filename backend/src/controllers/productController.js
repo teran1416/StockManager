@@ -33,7 +33,8 @@ try {
     description,
     quantity,
     price,
-    minStockThreshold: minStockThreshold || 5
+    minStockThreshold: minStockThreshold || 5,
+    user: req.user.id // Añadiendo el ID del usuario autenticado
     });
     
     const createdProduct = await product.save();

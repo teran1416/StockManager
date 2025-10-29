@@ -27,7 +27,7 @@
         <h3>{{ product.name }}</h3>
         <p class="description">{{ product.description }}</p>
         <div class="product-details">
-          <p><strong>Precio:</strong> ${{ product.price.toFixed(2) }}</p>
+          <p><strong>Precio:</strong> {{ formatCOP(product.price) }}</p>
           <p><strong>Cantidad:</strong> {{ product.quantity }}</p>
           <p><strong>Stock Mínimo:</strong> {{ product.minStockThreshold }}</p>
         </div>
@@ -114,6 +114,7 @@
 <script>
 import { ref, computed, onMounted } from 'vue'
 import { useProductStore } from '../store/products'
+import { formatCOP } from '../utils/format'
 
 export default {
   name: 'Products',
@@ -211,6 +212,7 @@ export default {
       showDeleteModal,
       currentProduct,
       newStockQuantity,
+      formatCOP,
       closeModals,
       editProduct,
       updateStock,

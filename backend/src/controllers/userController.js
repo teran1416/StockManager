@@ -6,6 +6,20 @@ exports.registerUser = async (req, res) => {
   try {
     const { fullName, email, password } = req.body;
 
+    // Validar formato de correo electrónico
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: 'Formato de correo electrónico inválido' });
+    }
+
+    // Validar contraseña (mínimo 8 caracteres, al menos una letra y un número)
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({ 
+        message: 'La contraseña debe tener al menos 8 caracteres, incluyendo al menos una letra y un número' 
+      });
+    }
+
     // Check if user already exists
     const userExists = await User.findOne({ email });
     if (userExists) {

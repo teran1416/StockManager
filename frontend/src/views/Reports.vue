@@ -2,7 +2,7 @@
   <div class="reports-container">
     <h1>Reportes de Inventario</h1>
     
-    <div class="report-cards">
+  <div class="report-cards">
       <div class="report-card">
         <h2>Resumen de Inventario</h2>
         <div class="report-stats">
@@ -12,7 +12,7 @@
           </div>
           <div class="stat-item">
             <span class="stat-label">Valor Total:</span>
-            <span class="stat-value">${{ formatCurrency(productStore.totalInventoryValue) }}</span>
+            <span class="stat-value">{{ formatCOP(productStore.totalInventoryValue) }}</span>
           </div>
           <div class="stat-item">
             <span class="stat-label">Productos con Stock Bajo:</span>
@@ -61,9 +61,9 @@
           <tr v-for="product in productStore.products" :key="product._id">
             <td>{{ product.name }}</td>
             <td>{{ product.description }}</td>
-            <td>${{ product.price.toFixed(2) }}</td>
+            <td>{{ formatCOP(product.price) }}</td>
             <td>{{ product.quantity }}</td>
-            <td>${{ (product.price * product.quantity).toFixed(2) }}</td>
+            <td>{{ formatCOP(product.price * product.quantity) }}</td>
           </tr>
         </tbody>
       </table>
@@ -73,6 +73,9 @@
       <button @click="printReport" class="print-button">
         Imprimir Reporte
       </button>
+      <button @click="exportCSV" class="export-button">
+        Exportar CSV
+      </button>
     </div>
   </div>
 </template>
@@ -80,6 +83,7 @@
 <script>
 import { onMounted } from 'vue'
 import { useProductStore } from '../store/products'
+import { formatCOP } from '../utils/format'
 
 export default {
   name: 'Reports',
@@ -91,22 +95,46 @@ export default {
       await productStore.fetchLowStockProducts()
     })
     
-    const formatCurrency = (value) => {
-      return value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')
-    }
-    
     const printReport = () => {
       window.print()
+    }
+
+    const exportCSV = () => {
+      const headers = ['Nombre', 'Descripción', 'Precio', 'Cantidad', 'ValorTotal']
+      const rows = (productStore.products || []).map(p => {
+        const price = Math.round(Number(p.price) || 0)
+        const total = Math.round((Number(p.price) || 0) * (Number(p.quantity) || 0))
+        return [p.name || '', p.description || '', price, p.quantity || 0, total]
+      })
+
+      // Build CSV string with quoted fields
+      const csv = [headers, ...rows]
+        .map(r => r.map(cell => '"' + String(cell).replace(/"/g, '""') + '"').join(','))
+        .join('\r\n')
+
+      // Add BOM for Excel compatibility and create blob
+      const csvWithBom = '\uFEFF' + csv
+      const blob = new Blob([csvWithBom], { type: 'text/csv;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', 'stock_report.csv')
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      URL.revokeObjectURL(url)
     }
     
     return {
       productStore,
-      formatCurrency,
-      printReport
+      formatCOP,
+      printReport,
+      exportCSV
     }
   }
 }
 </script>
+
 
 <style scoped>
 .reports-container {
@@ -213,6 +241,16 @@ h1 {
   padding: 10px 15px;
   border-radius: 4px;
   cursor: pointer;
+}
+
+.export-button {
+  background-color: #42b983;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 8px;
 }
 
 /* Estilos para impresión */

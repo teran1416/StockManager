@@ -6,6 +6,7 @@ import Home from '../views/Home.vue'
 import Login from '../views/Login.vue'
 import Register from '../views/Register.vue'
 import Products from '../views/Products.vue'
+import Reports from '../views/Reports.vue'
 
 const routes = [
   {
@@ -30,6 +31,12 @@ const routes = [
     path: '/products',
     name: 'Products',
     component: Products,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/reports',
+    name: 'Reports',
+    component: Reports,
     meta: { requiresAuth: true }
   }
 ]

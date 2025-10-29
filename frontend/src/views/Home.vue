@@ -10,7 +10,7 @@
       
       <div class="stat-card">
         <h3>Valor Total del Inventario</h3>
-        <p class="stat-value">${{ formatCurrency(productStore.totalInventoryValue) }}</p>
+        <p class="stat-value">{{ formatCOP(productStore.totalInventoryValue) }}</p>
       </div>
       
       <div class="stat-card">
@@ -35,6 +35,7 @@
 <script>
 import { onMounted } from 'vue'
 import { useProductStore } from '../store/products'
+import { formatCOP } from '../utils/format'
 
 export default {
   name: 'Home',
@@ -46,13 +47,9 @@ export default {
       await productStore.fetchLowStockProducts()
     })
     
-    const formatCurrency = (value) => {
-      return value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')
-    }
-    
     return {
       productStore,
-      formatCurrency
+      formatCOP
     }
   }
 }
