@@ -6,10 +6,10 @@ exports.registerUser = async (req, res) => {
   try {
     const { fullName, email, password } = req.body;
 
-    // Validar formato de correo electrónico
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // Validar formato de correo electrónico y restringir dominios a gmail.com o hotmail.com
+    const emailRegex = /^[^\s@]+@(?:gmail\.com|hotmail\.com)$/i;
     if (!emailRegex.test(email)) {
-      return res.status(400).json({ message: 'Formato de correo electrónico inválido' });
+      return res.status(400).json({ message: 'Solo se permiten correos @gmail.com o @hotmail.com' });
     }
 
     // Validar contraseña (mínimo 8 caracteres, al menos una letra mayúscula, un número y un carácter especial)

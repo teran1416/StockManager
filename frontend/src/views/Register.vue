@@ -70,9 +70,10 @@ export default {
   },
   methods: {
     validateEmail() {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      // Validar formato y restringir dominios a gmail.com o hotmail.com
+      const emailRegex = /^[^\s@]+@(?:gmail\.com|hotmail\.com)$/i
       if (!emailRegex.test(this.email)) {
-        this.emailError = 'Por favor ingresa un correo electrónico válido'
+        this.emailError = 'No es un correo valido'
         return false
       }
       this.emailError = ''
