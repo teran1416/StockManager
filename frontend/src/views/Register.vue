@@ -15,7 +15,24 @@
 
       <div class="form-group">
         <label for="password">Contraseña</label>
-        <input id="password" v-model="password" type="password" required placeholder="Ingresa tu contraseña" @blur="validatePassword" />
+        <div class="password-input-group">
+          <input 
+            id="password" 
+            v-model="password" 
+            :type="showPassword ? 'text' : 'password'" 
+            required 
+            placeholder="Ingresa tu contraseña" 
+            @blur="validatePassword"
+          />
+          <button 
+            type="button" 
+            class="toggle-password" 
+            @click="showPassword = !showPassword"
+            :title="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+          >
+            <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+          </button>
+        </div>
         <p class="password-requirements">La contraseña debe tener al menos 8 caracteres, incluir una letra mayúscula, un número y un carácter especial.</p>
         <p v-if="passwordError" class="field-error"><i class="fas fa-exclamation-circle"></i> {{ passwordError }}</p>
       </div>
@@ -47,7 +64,8 @@ export default {
       error: '',
       emailError: '',
       passwordError: '',
-      loading: false
+      loading: false,
+      showPassword: false
     }
   },
   methods: {
@@ -62,7 +80,8 @@ export default {
     },
     
     validatePassword() {
-      const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/
+      // Actualizada para incluir punto y más caracteres especiales comunes
+      const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[.!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/
       if (!passwordRegex.test(this.password)) {
         this.passwordError = 'La contraseña no cumple con los requisitos de seguridad'
         return false
@@ -106,6 +125,28 @@ export default {
 .register-container { max-width: 400px; margin: 0 auto; padding: 20px; }
 .register-form { display: flex; flex-direction: column; gap: 15px; }
 .form-group { display: flex; flex-direction: column; gap: 5px; }
+.password-input-group { 
+  position: relative; 
+  display: flex; 
+  align-items: center; 
+}
+.password-input-group input { 
+  width: 100%; 
+  padding-right: 40px; 
+}
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 0;
+  font-size: 16px;
+}
+.toggle-password:hover {
+  color: #42b983;
+}
 input { padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; }
 button { background: #42b983; color: white; border: none; padding: 12px; border-radius: 4px; font-size: 16px; cursor: pointer; }
 button:hover { background: #3aa876; }

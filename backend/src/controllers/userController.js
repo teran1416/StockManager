@@ -12,11 +12,12 @@ exports.registerUser = async (req, res) => {
       return res.status(400).json({ message: 'Formato de correo electrónico inválido' });
     }
 
-    // Validar contraseña (mínimo 8 caracteres, al menos una letra y un número)
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    // Validar contraseña (mínimo 8 caracteres, al menos una letra mayúscula, un número y un carácter especial)
+    // Alineado con la validación del frontend: permite caracteres especiales como .,!@# etc.
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[.!@#$%^&*()_+\-=[\]{};':"\\|,.<>\/?]).{8,}$/;
     if (!passwordRegex.test(password)) {
       return res.status(400).json({ 
-        message: 'La contraseña debe tener al menos 8 caracteres, incluyendo al menos una letra y un número' 
+        message: 'La contraseña debe tener al menos 8 caracteres, incluir una letra mayúscula, un número y un carácter especial' 
       });
     }
 
