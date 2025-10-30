@@ -2,16 +2,26 @@ import { defineStore } from 'pinia'
 import axios from 'axios'
 
 export const useAuthStore = defineStore('auth', {
-  state: () => ({
-    user: JSON.parse(localStorage.getItem('user')) || null,
-    token: localStorage.getItem('token') || null
-  }),
+  state: () => {
+    const storedUser = localStorage.getItem('user')
+    return {
+      user: storedUser ? JSON.parse(storedUser) : null,
+      token: localStorage.getItem('token') || null
+    }
+  },
   
   getters: {
     isAuthenticated: (state) => !!state.token
   },
   
   actions: {
+    setUser(userData) {
+      this.user = userData
+      this.token = userData.token
+      localStorage.setItem('user', JSON.stringify(userData))
+      localStorage.setItem('token', userData.token)
+    },
+
     async login(email, password) {
       try {
         const response = await axios.post('http://localhost:5000/api/users/login', {

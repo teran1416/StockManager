@@ -46,7 +46,6 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../store/auth'
-import { authService } from '../services/auth.service'
 
 export default {
   name: 'Login',
@@ -64,15 +63,15 @@ export default {
         loading.value = true
         error.value = ''
         
-        // Usar el servicio de autenticación
-        const userData = await authService.login(email.value, password.value)
+        const result = await authStore.login(email.value, password.value)
         
-        // Actualizar el store con los datos del usuario
-        authStore.setUser(userData)
-        
-        router.push('/')
+        if (result.success) {
+          router.push('/')
+        } else {
+          error.value = result.message
+        }
       } catch (err) {
-        error.value = err.response?.data?.message || 'Error al iniciar sesión'
+        error.value = 'Error al iniciar sesión. Por favor, intente nuevamente.'
       } finally {
         loading.value = false
       }
