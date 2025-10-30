@@ -7,7 +7,8 @@ createProduct,
 updateProduct, 
 deleteProduct, 
 updateStock,
-getLowStockProducts
+getLowStockProducts,
+exportProductsCSV
 } = require('../controllers/productController');
 const auth = require('../middleware/auth');
 
@@ -34,5 +35,8 @@ router.delete('/:id', deleteProduct);
 
 // Update stock (add or remove)
 router.put('/:id/stock', updateStock);
+
+// Export products to CSV
+router.get('/export/csv', exportProductsCSV);
 
 module.exports = router;

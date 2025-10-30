@@ -13,31 +13,31 @@ const routes = [
     path: '/',
     name: 'Home',
     component: Home,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, layout: 'main' }
   },
   {
     path: '/login',
     name: 'Login',
     component: Login,
-    meta: { guest: true }
+    meta: { guest: true, layout: 'auth' }
   },
   {
     path: '/register',
     name: 'Register',
     component: Register,
-    meta: { guest: true }
+    meta: { guest: true, layout: 'auth' }
   },
   {
     path: '/products',
     name: 'Products',
     component: Products,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, layout: 'main' }
   },
   {
     path: '/reports',
     name: 'Reports',
     component: Reports,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, layout: 'main' }
   }
 ]
 

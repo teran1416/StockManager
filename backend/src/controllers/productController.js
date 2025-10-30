@@ -119,14 +119,47 @@ try {
 
 // Get low stock products
 exports.getLowStockProducts = async (req, res) => {
-try {
-    // Find products where quantity is less than or equal to minStockThreshold
-    const products = await Product.find({
-    $expr: { $lte: ["$quantity", "$minStockThreshold"] }
-    });
-    
-    res.json(products);
-} catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
-}
+    try {
+        // Find products where quantity is less than or equal to minStockThreshold
+        const products = await Product.find({
+            $expr: { $lte: ["$quantity", "$minStockThreshold"] }
+        });
+        
+        res.json(products);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+// Export products to CSV
+exports.exportProductsCSV = async (req, res) => {
+    try {
+        const products = await Product.find({});
+        
+        // Crear el contenido CSV
+        const headers = ['Nombre', 'Descripción', 'Precio', 'Cantidad', 'Stock Mínimo', 'Valor Total'];
+        const rows = products.map(product => [
+            product.name,
+            product.description,
+            product.price,
+            product.quantity,
+            product.minStockThreshold,
+            product.price * product.quantity
+        ]);
+        
+        // Convertir a formato CSV
+        const csvContent = [
+            headers.join(','),
+            ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+        ].join('\n');
+        
+        // Configurar headers para la descarga
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+        res.setHeader('Content-Disposition', 'attachment; filename=stock_report.csv');
+        
+        // Enviar el archivo
+        res.send(csvContent);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
 };

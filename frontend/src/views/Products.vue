@@ -115,6 +115,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useProductStore } from '../store/products'
 import { formatCOP } from '../utils/format'
+import { productService } from '../services/product.service'
 
 export default {
   name: 'Products',
@@ -175,8 +176,13 @@ export default {
     }
     
     const submitAddProduct = async () => {
-      await productStore.createProduct(currentProduct.value)
-      closeModals()
+      try {
+        const newProduct = await productService.createProduct(currentProduct.value);
+        productStore.addProduct(newProduct);
+        closeModals()
+      } catch (error) {
+        console.error('Error al crear producto:', error);
+      }
     }
     
     const submitEditProduct = async () => {

@@ -84,6 +84,7 @@
 import { onMounted } from 'vue'
 import { useProductStore } from '../store/products'
 import { formatCOP } from '../utils/format'
+import { reportService } from '../services/report.service'
 
 export default {
   name: 'Reports',
@@ -99,30 +100,29 @@ export default {
       window.print()
     }
 
-    const exportCSV = () => {
-      const headers = ['Nombre', 'Descripción', 'Precio', 'Cantidad', 'ValorTotal']
-      const rows = (productStore.products || []).map(p => {
-        const price = Math.round(Number(p.price) || 0)
-        const total = Math.round((Number(p.price) || 0) * (Number(p.quantity) || 0))
-        return [p.name || '', p.description || '', price, p.quantity || 0, total]
-      })
-
-      // Build CSV string with quoted fields
-      const csv = [headers, ...rows]
-        .map(r => r.map(cell => '"' + String(cell).replace(/"/g, '""') + '"').join(','))
-        .join('\r\n')
-
-      // Add BOM for Excel compatibility and create blob
-      const csvWithBom = '\uFEFF' + csv
-      const blob = new Blob([csvWithBom], { type: 'text/csv;charset=utf-8;' })
-      const url = URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.setAttribute('download', 'stock_report.csv')
-      document.body.appendChild(link)
-      link.click()
-      link.remove()
-      URL.revokeObjectURL(url)
+    const exportCSV = async () => {
+      try {
+        const blob = await reportService.exportToCsv();
+        
+        // Crear el objeto URL para el blob
+        const url = window.URL.createObjectURL(new Blob([blob], { type: 'text/csv' }));
+        
+        // Crear elemento de descarga
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'stock_report.csv';
+        
+        // Añadir al DOM y hacer click
+        document.body.appendChild(a);
+        a.click();
+        
+        // Limpiar
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error('Error al exportar reporte:', error);
+        alert('Error al exportar el reporte. Por favor, intente nuevamente.');
+      }
     }
     
     return {

@@ -1,53 +1,28 @@
 <template>
   <div class="app-container">
-    <header v-if="isAuthenticated" class="app-header">
-      <div class="logo">
-        <h1>StockManager</h1>
-      </div>
-      <nav class="main-nav">
-        <router-link to="/" class="nav-link">
-          <i class="fas fa-home"></i> Inicio
-        </router-link>
-        <router-link to="/products" class="nav-link">
-          <i class="fas fa-box"></i> Productos
-        </router-link>
-        <router-link to="/reports" class="nav-link">
-          <i class="fas fa-chart-bar"></i> Reportes
-        </router-link>
-        <button @click="logout" class="logout-btn">
-          <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
-        </button>
-      </nav>
-    </header>
-    <main>
+    <component :is="layoutComponent">
       <router-view />
-    </main>
-    <footer class="app-footer">
-      <p>Sistema de Gestión de Inventario</p>
-    </footer>
+    </component>
   </div>
 </template>
 
 <script>
-import { useAuthStore } from './store/auth'
 import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+import MainLayout from './layouts/MainLayout.vue'
+import AuthLayout from './layouts/AuthLayout.vue'
 
 export default {
   name: 'App',
   setup() {
-    const authStore = useAuthStore()
+    const route = useRoute()
 
-    const logout = () => {
-      authStore.logout()
-    }
+    const layoutComponent = computed(() => {
+      const layout = route.meta?.layout || 'main'
+      return layout === 'auth' ? AuthLayout : MainLayout
+    })
 
-    // Usar computed para que la propiedad sea reactiva y se actualice cuando cambie el estado
-    const isAuthenticated = computed(() => authStore.isAuthenticated)
-
-    return {
-      isAuthenticated,
-      logout
-    }
+    return { layoutComponent }
   }
 }
 </script>
