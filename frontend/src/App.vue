@@ -1,27 +1,40 @@
 <template>
+  <!-- Contenedor principal de la aplicación -->
   <div class="app-container">
+    <!-- Renderiza dinámicamente el layout según la ruta actual -->
     <component :is="layoutComponent">
+      <!-- Punto de montaje donde se inyecta el componente de la ruta activa -->
       <router-view />
     </component>
   </div>
 </template>
 
 <script>
+// Importa utilidades reactivas de Vue para computar valores en función del estado
 import { computed } from 'vue'
+// Importa useRoute para acceder a la información de la ruta actual
 import { useRoute } from 'vue-router'
+// Importa los dos layouts disponibles en la aplicación
 import MainLayout from './layouts/MainLayout.vue'
 import AuthLayout from './layouts/AuthLayout.vue'
 
 export default {
+  // Nombre del componente raíz
   name: 'App',
+  // Composición de lógica usando la API de Composition
   setup() {
+    // Obtiene la ruta actual para leer sus metadatos (layout, requerimientos de auth, etc.)
     const route = useRoute()
 
+    // Computa el componente de layout a utilizar según meta.layout de la ruta
     const layoutComponent = computed(() => {
+      // Toma el layout desde los metadatos o usa 'main' por defecto
       const layout = route.meta?.layout || 'main'
+      // Si el layout es 'auth', renderiza AuthLayout; de lo contrario, MainLayout
       return layout === 'auth' ? AuthLayout : MainLayout
     })
 
+    // Expone el layout seleccionado al template
     return { layoutComponent }
   }
 }

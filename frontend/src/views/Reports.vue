@@ -1,19 +1,25 @@
+<!-- Vista de reportes con estadísticas, tablas y exportación a CSV -->
 <template>
   <div class="reports-container">
+    <!-- Título principal -->
     <h1>Reportes de Inventario</h1>
     
-  <div class="report-cards">
+    <!-- Tarjetas de reporte resumidas -->
+    <div class="report-cards">
       <div class="report-card">
         <h2>Resumen de Inventario</h2>
         <div class="report-stats">
+          <!-- Métrica: total de productos -->
           <div class="stat-item">
             <span class="stat-label">Total de Productos:</span>
             <span class="stat-value">{{ productStore.totalProducts }}</span>
           </div>
+          <!-- Métrica: valor total -->
           <div class="stat-item">
             <span class="stat-label">Valor Total:</span>
             <span class="stat-value">{{ formatCOP(productStore.totalInventoryValue) }}</span>
           </div>
+          <!-- Métrica: número de productos con stock bajo -->
           <div class="stat-item">
             <span class="stat-label">Productos con Stock Bajo:</span>
             <span class="stat-value">{{ productStore.lowStockProducts.length }}</span>
@@ -23,6 +29,7 @@
       
       <div class="report-card">
         <h2>Productos con Stock Bajo</h2>
+        <!-- Tabla visible si hay productos con bajo stock -->
         <table v-if="productStore.lowStockProducts.length > 0" class="report-table">
           <thead>
             <tr>
@@ -41,10 +48,12 @@
             </tr>
           </tbody>
         </table>
+        <!-- Mensaje si no hay datos -->
         <p v-else class="no-data">No hay productos con stock bajo.</p>
       </div>
     </div>
     
+    <!-- Tabla con listado completo de productos -->
     <div class="report-card full-width">
       <h2>Listado de Productos</h2>
       <table class="report-table">
@@ -69,6 +78,7 @@
       </table>
     </div>
     
+    <!-- Acciones de exportación e impresión -->
     <div class="export-actions">
       <button @click="printReport" class="print-button">
         Imprimir Reporte
@@ -81,42 +91,51 @@
 </template>
 
 <script>
+// Hook de montaje para cargar datos al entrar a la vista
 import { onMounted } from 'vue'
+// Store de productos para leer métricas y listas
 import { useProductStore } from '../store/products'
+// Utilidad para formatear valores
 import { formatCOP } from '../utils/format'
+// Servicio para exportación del reporte
 import { reportService } from '../services/report.service'
 
 export default {
+  // Nombre de la vista
   name: 'Reports',
+  // API de composición
   setup() {
     const productStore = useProductStore()
     
+    // Carga métricas y lista de bajo stock al montar
     onMounted(async () => {
       await productStore.fetchProducts()
       await productStore.fetchLowStockProducts()
     })
     
+    // Dispara diálogo de impresión del navegador
     const printReport = () => {
       window.print()
     }
 
+    // Exporta los datos a CSV y dispara descarga
     const exportCSV = async () => {
       try {
         const blob = await reportService.exportToCsv();
         
-        // Crear el objeto URL para el blob
+        // Crear objeto URL para el blob (archivo CSV)
         const url = window.URL.createObjectURL(new Blob([blob], { type: 'text/csv' }));
         
-        // Crear elemento de descarga
+        // Crear elemento de descarga y configurar nombre
         const a = document.createElement('a');
         a.href = url;
         a.download = 'stock_report.csv';
         
-        // Añadir al DOM y hacer click
+        // Añadir al DOM y simular click
         document.body.appendChild(a);
         a.click();
         
-        // Limpiar
+        // Limpiar elementos temporales y liberar URL
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
       } catch (error) {
@@ -125,6 +144,7 @@ export default {
       }
     }
     
+    // Exponer referencias y handlers al template
     return {
       productStore,
       formatCOP,

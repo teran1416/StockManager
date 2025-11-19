@@ -1,11 +1,16 @@
+<!-- Vista de gestión de productos con búsqueda, CRUD y modales -->
 <template>
   <div class="products-container">
+    <!-- Título principal de la sección -->
     <h1>Gestión de Productos</h1>
     
+    <!-- Barra de acciones: agregar y buscar -->
     <div class="actions-bar">
+      <!-- Botón para abrir modal de agregado -->
       <button @click="showAddModal = true" class="add-button">
         Agregar Producto
       </button>
+      <!-- Campo de búsqueda reactivo -->
       <input 
         type="text" 
         v-model="searchQuery" 
@@ -14,23 +19,28 @@
       />
     </div>
     
+    <!-- Indicador de carga -->
     <div v-if="productStore.loading" class="loading">
       Cargando productos...
     </div>
     
+    <!-- Mensaje si no hay resultados -->
     <div v-else-if="filteredProducts.length === 0" class="no-products">
       No se encontraron productos.
     </div>
     
+    <!-- Grid de tarjetas de producto -->
     <div v-else class="products-grid">
       <div v-for="product in filteredProducts" :key="product._id" class="product-card">
         <h3>{{ product.name }}</h3>
         <p class="description">{{ product.description }}</p>
+        <!-- Datos principales del producto -->
         <div class="product-details">
           <p><strong>Precio:</strong> {{ formatCOP(product.price) }}</p>
           <p><strong>Cantidad:</strong> {{ product.quantity }}</p>
           <p><strong>Stock Mínimo:</strong> {{ product.minStockThreshold }}</p>
         </div>
+        <!-- Acciones por producto -->
         <div class="product-actions">
           <button @click="editProduct(product)" class="edit-button">Editar</button>
           <button @click="updateStock(product)" class="stock-button">Actualizar Stock</button>
@@ -45,6 +55,7 @@
         <span class="close" @click="closeModals">&times;</span>
         <h2>{{ showEditModal ? 'Editar Producto' : 'Agregar Producto' }}</h2>
         
+        <!-- Formulario que envía según el modo actual -->
         <form @submit.prevent="showEditModal ? submitEditProduct() : submitAddProduct()">
           <div class="form-group">
             <label for="name">Nombre</label>
@@ -112,22 +123,31 @@
 </template>
 
 <script>
+// Importa utilidades reactivas y ciclo de vida de Vue
 import { ref, computed, onMounted } from 'vue'
+// Importa el store de productos (estado global)
 import { useProductStore } from '../store/products'
+// Función para formatear valores como moneda COP
 import { formatCOP } from '../utils/format'
+// Servicio específico para creación directa vía API
 import { productService } from '../services/product.service'
 
 export default {
+  // Nombre de la vista
   name: 'Products',
+  // API de composición para gestionar estado, efectos y acciones
   setup() {
+    // Instancia del store para leer y modificar productos
     const productStore = useProductStore()
     
+    // Estado local para búsqueda y visibilidad de modales
     const searchQuery = ref('')
     const showAddModal = ref(false)
     const showEditModal = ref(false)
     const showStockModal = ref(false)
     const showDeleteModal = ref(false)
     
+    // Producto en edición/alta y cantidad nueva de stock
     const currentProduct = ref({
       name: '',
       description: '',
@@ -138,6 +158,7 @@ export default {
     
     const newStockQuantity = ref(0)
     
+    // Lista filtrada por nombre y descripción según query
     const filteredProducts = computed(() => {
       if (!searchQuery.value) return productStore.products
       
@@ -148,10 +169,12 @@ export default {
       )
     })
     
+    // Carga inicial de productos al montar la vista
     onMounted(async () => {
       await productStore.fetchProducts()
     })
     
+    // Cierra todos los modales activos
     const closeModals = () => {
       showAddModal.value = false
       showEditModal.value = false
@@ -159,22 +182,26 @@ export default {
       showDeleteModal.value = false
     }
     
+    // Prepara modal de edición con datos del producto
     const editProduct = (product) => {
       currentProduct.value = { ...product }
       showEditModal.value = true
     }
     
+    // Prepara modal de stock con datos del producto
     const updateStock = (product) => {
       currentProduct.value = { ...product }
       newStockQuantity.value = product.quantity
       showStockModal.value = true
     }
     
+    // Abre modal de confirmación de eliminación
     const confirmDelete = (product) => {
       currentProduct.value = { ...product }
       showDeleteModal.value = true
     }
     
+    // Envía alta de producto usando servicio y actualiza store
     const submitAddProduct = async () => {
       try {
         const newProduct = await productService.createProduct(currentProduct.value);
@@ -185,13 +212,15 @@ export default {
       }
     }
     
+    // Envía actualización de producto vía store
     const submitEditProduct = async () => {
       await productStore.updateProduct(currentProduct.value._id, currentProduct.value)
       closeModals()
     }
     
+    // Calcula diferencia y envía actualización de stock vía store
     const submitStockUpdate = async () => {
-      // Calculamos la diferencia para saber si estamos añadiendo o quitando stock
+      // Determina si se agrega o se reduce stock
       const isAddition = newStockQuantity.value > currentProduct.value.quantity;
       const quantityDiff = Math.abs(newStockQuantity.value - currentProduct.value.quantity);
       
@@ -203,11 +232,13 @@ export default {
       closeModals()
     }
     
+    // Elimina el producto mediante el store
     const submitDeleteProduct = async () => {
       await productStore.deleteProduct(currentProduct.value._id)
       closeModals()
     }
     
+    // Exponer estado, utilidades y handlers al template
     return {
       productStore,
       searchQuery,
