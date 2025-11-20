@@ -7,7 +7,7 @@
     <!-- Barra de acciones: agregar y buscar -->
     <div class="actions-bar">
       <!-- Botón para abrir modal de agregado -->
-      <button @click="showAddModal = true" class="add-button">
+      <button @click="openAddModal" class="add-button">
         Agregar Producto
       </button>
       <!-- Campo de búsqueda reactivo -->
@@ -129,8 +129,6 @@ import { ref, computed, onMounted } from 'vue'
 import { useProductStore } from '../store/products'
 // Función para formatear valores como moneda COP
 import { formatCOP } from '../utils/format'
-// Servicio específico para creación directa vía API
-import { productService } from '../services/product.service'
 
 export default {
   // Nombre de la vista
@@ -139,6 +137,15 @@ export default {
   setup() {
     // Instancia del store para leer y modificar productos
     const productStore = useProductStore()
+
+    // Estado base de un producto nuevo/edición
+    const createEmptyProduct = () => ({
+      name: '',
+      description: '',
+      price: 0,
+      quantity: 0,
+      minStockThreshold: 0
+    })
     
     // Estado local para búsqueda y visibilidad de modales
     const searchQuery = ref('')
@@ -148,14 +155,7 @@ export default {
     const showDeleteModal = ref(false)
     
     // Producto en edición/alta y cantidad nueva de stock
-    const currentProduct = ref({
-      name: '',
-      description: '',
-      price: 0,
-      quantity: 0,
-      minStockThreshold: 0
-    })
-    
+    const currentProduct = ref(createEmptyProduct())
     const newStockQuantity = ref(0)
     
     // Lista filtrada por nombre y descripción según query
@@ -174,12 +174,24 @@ export default {
       await productStore.fetchProducts()
     })
     
-    // Cierra todos los modales activos
+    // Limpia estado del formulario y cierra los modales
+    const resetFormState = () => {
+      currentProduct.value = createEmptyProduct()
+      newStockQuantity.value = 0
+    }
+
+    const openAddModal = () => {
+      resetFormState()
+      showEditModal.value = false
+      showAddModal.value = true
+    }
+
     const closeModals = () => {
       showAddModal.value = false
       showEditModal.value = false
       showStockModal.value = false
       showDeleteModal.value = false
+      resetFormState()
     }
     
     // Prepara modal de edición con datos del producto
@@ -201,20 +213,22 @@ export default {
       showDeleteModal.value = true
     }
     
-    // Envía alta de producto usando servicio y actualiza store
+    // Envía alta de producto usando el store
     const submitAddProduct = async () => {
-      try {
-        const newProduct = await productService.createProduct(currentProduct.value);
-        productStore.addProduct(newProduct);
-        closeModals()
-      } catch (error) {
-        console.error('Error al crear producto:', error);
+      const { success, message } = await productStore.createProduct({
+        ...currentProduct.value
+      })
+      if (!success) {
+        console.error('Error al crear producto:', message)
+        return
       }
+      closeModals()
     }
     
     // Envía actualización de producto vía store
     const submitEditProduct = async () => {
-      await productStore.updateProduct(currentProduct.value._id, currentProduct.value)
+      const productId = currentProduct.value._id || currentProduct.value.id
+      await productStore.updateProduct(productId, currentProduct.value)
       closeModals()
     }
     
@@ -224,18 +238,29 @@ export default {
       const isAddition = newStockQuantity.value > currentProduct.value.quantity;
       const quantityDiff = Math.abs(newStockQuantity.value - currentProduct.value.quantity);
       
-      await productStore.updateStock(
-        currentProduct.value._id, 
+      const { success, message } = await productStore.updateStock(
+        currentProduct.value._id || currentProduct.value.id, 
         quantityDiff,
         isAddition
       )
-      closeModals()
+      if (success) {
+        closeModals()
+      } else {
+        console.error('Error al actualizar stock:', message)
+      }
     }
     
     // Elimina el producto mediante el store
     const submitDeleteProduct = async () => {
-      await productStore.deleteProduct(currentProduct.value._id)
-      closeModals()
+      const productId = currentProduct.value._id || currentProduct.value.id
+      const { success, message } = await productStore.deleteProduct(productId)
+      if (success) {
+        // Refresca la lista desde el backend para asegurar el estado
+        await productStore.fetchProducts()
+        closeModals()
+      } else {
+        console.error('Error al eliminar producto:', message)
+      }
     }
     
     // Exponer estado, utilidades y handlers al template
@@ -250,6 +275,7 @@ export default {
       currentProduct,
       newStockQuantity,
       formatCOP,
+      openAddModal,
       closeModals,
       editProduct,
       updateStock,

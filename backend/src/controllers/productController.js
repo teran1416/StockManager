@@ -97,8 +97,8 @@ exports.deleteProduct = async (req, res) => {
       return res.status(404).json({ message: 'Product not found' });
     }
 
-    // Elimina el documento y confirma la operación
-    await product.remove();
+    // Elimina el documento de forma compatible con versiones recientes de Mongoose
+    await Product.deleteOne({ _id: product._id, user: req.user.id });
     res.json({ message: 'Product removed' });
   } catch (error) {
     // Maneja errores del servidor

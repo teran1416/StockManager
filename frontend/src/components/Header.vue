@@ -32,6 +32,7 @@
 // Importa el store de autenticación y utilidades de Vue
 import { useAuthStore } from '@/store/auth'
 import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 
 export default {
   // Nombre del componente
@@ -40,8 +41,12 @@ export default {
   setup() {
     // Instancia del store de autenticación
     const authStore = useAuthStore()
+    const router = useRouter()
     // Método para cerrar sesión llamando a la acción del store
-    const logout = () => authStore.logout()
+    const logout = () => {
+      authStore.logout()
+      router.push({ name: 'Login' })
+    }
     // Estado derivado: indica si el usuario está autenticado
     const isAuthenticated = computed(() => authStore.isAuthenticated)
     // Expone los elementos al template
