@@ -5,6 +5,13 @@ const mongoose = require('mongoose');
 const connectDB = async () => {
   // Inicia un bloque try/catch para capturar errores de conexión
   try {
+    // Valida que la variable de entorno MONGO_URI esté definida
+    if (!process.env.MONGO_URI) {
+      console.error('Error: MONGO_URI is not defined. Create a .env file or set the MONGO_URI environment variable.');
+      // Salimos con código 1 para evitar que mongoose.openUri reciba undefined
+      process.exit(1);
+    }
+
     // Realiza la conexión a MongoDB usando la URI almacenada en la variable de entorno MONGO_URI
     const conn = await mongoose.connect(process.env.MONGO_URI, {
       // Habilita el nuevo parser de URL para evitar advertencias y mejorar compatibilidad

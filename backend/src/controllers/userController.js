@@ -59,8 +59,10 @@ exports.registerUser = async (req, res) => {
       token
     });
   } catch (error) {
-    // Ante cualquier excepción, responde con error 500 (error de servidor) y el mensaje asociado
-    res.status(500).json({ message: 'Server error', error: error.message });
+    // Imprime el error completo en la consola para depuración
+    console.error('Error en registerUser:', error);
+    // Devuelve el error completo en la respuesta para depuración
+    res.status(500).json({ message: 'Server error', error: error.message, stack: error.stack });
   }
 };
 
