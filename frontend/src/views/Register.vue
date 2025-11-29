@@ -18,6 +18,18 @@
         <p v-if="emailError" class="field-error"><i class="fas fa-exclamation-circle"></i> {{ emailError }}</p>
       </div>
 
+      <!-- Campo de teléfono
+      <div class="form-group">
+        <label for="phone">Teléfono</label>
+        <input id="phone" v-model="phone" type="tel" required placeholder="Ingresa tu número de teléfono" @blur="validatePhone" />
+      </div> -->
+
+      <!-- Campo de edad -->
+      <div class="form-group">
+        <label for="age">Edad</label>
+        <input id="age" v-model.number="age" type="number" required placeholder="Ingresa tu edad (<=18)" @blur="validateAge" />
+      </div>
+
       <!-- Campo de contraseña con botón para mostrar/ocultar -->
       <div class="form-group">
         <label for="password">Contraseña</label>
@@ -75,10 +87,14 @@ export default {
       // Campos del formulario
       fullName: '',
       email: '',
+      phone: '',
+      age: null,
       password: '',
       // Mensajes de error generales y por campo
       error: '',
       emailError: '',
+      phoneError: '',
+      ageError: '',
       passwordError: '',
       // Estado de carga y toggle de visibilidad de contraseña
       loading: false,
@@ -97,6 +113,25 @@ export default {
       this.emailError = ''
       return true
     },
+//     validatePhone() {
+//       const phoneRegex = /^\+?\d{10,15}$/
+//       if (!phoneRegex.test(this.phone)) {
+//         this.phoneError = 'Ingresa un teléfono válido (10 a 15 dígitos, puede iniciar con +)'
+//         return false
+//       }
+//       this.phoneError = ''
+//       return true
+//     },
+//    validateAge() {
+//   const n = Number(this.age)
+//   if (n > 18 || Number.isNaN(n)) {
+//     this.ageError = 'La edad debe ser 18 o menor'
+//     return false
+//   }
+//   this.ageError = ''
+//   return true
+}
+,
     
     validatePassword() {
       // Requisitos: 8+ caracteres, 1 mayúscula, 1 número y 1 carácter especial
@@ -115,10 +150,12 @@ export default {
       
       // Valida campos antes de enviar
       const isEmailValid = this.validateEmail()
+      const isPhoneValid = this.validatePhone()
+      const isAgeValid = this.validateAge()
       const isPasswordValid = this.validatePassword()
       
       // Si alguna validación falla, no continúa
-      if (!isEmailValid || !isPasswordValid) {
+      if (!isEmailValid || !isPhoneValid || !isAgeValid || !isPasswordValid) {
         return
       }
       
@@ -130,6 +167,8 @@ export default {
         const { success, message } = await auth.register(
           this.fullName.trim(),
           this.email.trim().toLowerCase(),
+          this.phone.trim(),
+          Number(this.age),
           this.password
         )
         // Navega al Home si fue exitoso
@@ -145,7 +184,7 @@ export default {
       }
     }
   }
-}
+
 </script>
 
 <style scoped>
